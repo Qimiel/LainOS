@@ -37,13 +37,13 @@ void Journal::ComputeAppState(GraphicsContext* gc, CompositeWidget* widget) {
 void Journal::DrawTheme(CompositeWidget* widget) {
 
 	//blue lines
-	for (uint8_t y = font_height-1; y < 200; y += font_height) {
+	for (uint8_t y = font_height-1; y < GRAPHICS_LOGICAL_HEIGHT; y += font_height) {
 		
-		widget->DrawLine(widget->x+0, widget->y+y, widget->x+320, widget->y+y, 0x2b);
+		widget->DrawLine(widget->x+0, widget->y+y, widget->x+GRAPHICS_LOGICAL_WIDTH, widget->y+y, 0x2b);
 	}
 	
 	//red line
-	widget->DrawLine(widget->x+0, widget->y+0, widget->x+0, widget->y+200, 0x3c);
+	widget->DrawLine(widget->x+0, widget->y+0, widget->x+0, widget->y+GRAPHICS_LOGICAL_HEIGHT, 0x3c);
 }
 
 

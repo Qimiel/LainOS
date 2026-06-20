@@ -43,7 +43,7 @@ namespace os {
 				Shooter shooter;
 
 
-				struct math::point walkPixels[320];
+				struct math::point walkPixels[GRAPHICS_LOGICAL_WIDTH];
 				common::uint16_t stepsNum;
 				common::uint8_t walkCycle;
 				

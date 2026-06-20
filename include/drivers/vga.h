@@ -7,6 +7,7 @@
 #include <drivers/driver.h>
 #include <gui/font.h>
 #include <gui/pixelart.h>
+#include <gui/screen.h>
 #include <math.h>
 
 
@@ -39,9 +40,22 @@ namespace os {
 			
 			common::uint8_t* GetFrameBufferSegment();
 			common::uint8_t* FrameBufferSegment;
+			common::uint32_t frameBufferPitch;
+			common::uint32_t frameBufferWidth;
+			common::uint32_t frameBufferHeight;
+			common::uint8_t frameBufferBpp;
+			common::uint8_t frameBufferType;
+			common::uint8_t redFieldPosition;
+			common::uint8_t redMaskSize;
+			common::uint8_t greenFieldPosition;
+			common::uint8_t greenMaskSize;
+			common::uint8_t blueFieldPosition;
+			common::uint8_t blueMaskSize;
+			bool linearFrameBuffer;
+			bool highResolutionMode;
 
 			//back buffer
-			common::uint8_t pixels[64000];
+			common::uint8_t pixels[gui::GRAPHICS_LOGICAL_SIZE];
 
 			public:
 				VideoGraphicsArray();
@@ -49,6 +63,18 @@ namespace os {
 
 				virtual bool SupportsMode(common::uint32_t width, common::uint32_t height, common::uint32_t colordepth);
 				virtual bool SetMode(common::uint32_t width, common::uint32_t height, common::uint32_t colordepth);
+				virtual void UseLinearFrameBuffer(common::uint64_t address,
+								  common::uint32_t pitch,
+								  common::uint32_t width,
+								  common::uint32_t height,
+								  common::uint8_t bpp,
+								  common::uint8_t type,
+								  common::uint8_t redFieldPosition,
+								  common::uint8_t redMaskSize,
+								  common::uint8_t greenFieldPosition,
+								  common::uint8_t greenMaskSize,
+								  common::uint8_t blueFieldPosition,
+								  common::uint8_t blueMaskSize);
 				
 
 				virtual void PutPixel(common::int32_t x, common::int32_t y, common::uint8_t colorIndex);

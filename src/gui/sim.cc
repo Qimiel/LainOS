@@ -27,7 +27,7 @@ Simulator::Simulator(CMOS* cmos) {
 	this->walkCycle = 1;
 
 
-	for (int i = 0; i < 320; i++) {
+	for (int i = 0; i < GRAPHICS_LOGICAL_WIDTH; i++) {
 		
 		if (i < 16) { keylog[i] = 0x00; }
 		walkPixels[i].x = 0;
@@ -245,7 +245,7 @@ uint8_t Simulator::MenuSelect(int32_t newMouseX, int32_t newMouseY, uint8_t butt
 void Simulator::DrawMenuSelect(GraphicsContext* gc) {
 
 	//background
-	gc->FillRectangle(0, 0, 320, 200, 0x09);
+	gc->FillRectangle(0, 0, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x09);
 	gc->FillRectangle(60, 50, 200, 100, 0x08);
 	gc->DrawRectangle(60, 50, 200, 100, 0x07);
 	
@@ -432,7 +432,7 @@ void Simulator::Walk() {
 	} else {	
 		if (mousePress) {
 		
-			for (int i = 0; i < 320; i++) {
+			for (int i = 0; i < GRAPHICS_LOGICAL_WIDTH; i++) {
 		
 				walkPixels[i].x = 0;
 				walkPixels[i].y = 0;
@@ -488,7 +488,7 @@ void Simulator::DrawRoom(GraphicsContext* gc) {
 		switch (event) {
 		
 			case 1:
-				gc->FillRectangle(0, 0, 320, 200, 0x40);
+				gc->FillRectangle(0, 0, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x40);
 				if (ticks >= 360) { gc->PutText("GAME OVER", 133, 96, 0x24); }
 				if (ticks >= 720) { reboot(); }
 				ticks++;
@@ -524,11 +524,11 @@ void Simulator::DrawRoom(GraphicsContext* gc) {
 
 
 	//background
-	gc->FillRectangle(0, 0, 320, 200, 0x08);
+	gc->FillRectangle(0, 0, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x08);
 	
 	//floor
-	gc->FillRectangle(0, 95, 320, 200, 0x39);
-	uint16_t xFloor[] = {0, 160, 320};
+	gc->FillRectangle(0, 95, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x39);
+	uint16_t xFloor[] = {0, GRAPHICS_LOGICAL_WIDTH/2, GRAPHICS_LOGICAL_WIDTH};
 	uint16_t yFloor[] = {95, 65, 95};
 	gc->FillPolygon(xFloor, yFloor, 3, 0x39);
 
@@ -544,7 +544,7 @@ void Simulator::DrawRoom(GraphicsContext* gc) {
 	
 	//walls
 	//brown
-	uint16_t xWall1[] = {0, 160, 320, 320, 160, 0};
+	uint16_t xWall1[] = {0, GRAPHICS_LOGICAL_WIDTH/2, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_WIDTH/2, 0};
 	uint16_t yWall1[] = {95, 65, 95, 80, 50, 80};
 	gc->FillPolygon(xWall1, yWall1, 6, 0x39);
 
@@ -557,16 +557,16 @@ void Simulator::DrawRoom(GraphicsContext* gc) {
 	gc->FillPolygon(xWall1, yWall3, 6, 0x39);
 	
 	//outlines	
-	gc->DrawLine(0, 95, 160, 65, 0x3f);
-	gc->DrawLine(160, 65, 320, 95, 0x40);
-	gc->DrawLine(0, 80, 160, 50, 0x3f);
-	gc->DrawLine(160, 50, 320, 80, 0x40);
-	gc->DrawLine(160, 50, 320, 80, 0x3f);
-	gc->DrawLine(160, 40, 0, 70, 0x40);
-	gc->DrawLine(160, 40, 320, 70, 0x3f);
-	gc->DrawLine(160, 0, 160, 65, 0x40);
-	gc->DrawLine(0, 20, 160, 0, 0x3f);
-	gc->DrawLine(160, 0, 320, 20, 0x40);
+	gc->DrawLine(0, 95, GRAPHICS_LOGICAL_WIDTH/2, 65, 0x3f);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 65, GRAPHICS_LOGICAL_WIDTH, 95, 0x40);
+	gc->DrawLine(0, 80, GRAPHICS_LOGICAL_WIDTH/2, 50, 0x3f);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 50, GRAPHICS_LOGICAL_WIDTH, 80, 0x40);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 50, GRAPHICS_LOGICAL_WIDTH, 80, 0x3f);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 40, 0, 70, 0x40);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 40, GRAPHICS_LOGICAL_WIDTH, 70, 0x3f);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 0, GRAPHICS_LOGICAL_WIDTH/2, 65, 0x40);
+	gc->DrawLine(0, 20, GRAPHICS_LOGICAL_WIDTH/2, 0, 0x3f);
+	gc->DrawLine(GRAPHICS_LOGICAL_WIDTH/2, 0, GRAPHICS_LOGICAL_WIDTH, 20, 0x40);
 
 
 
@@ -701,6 +701,6 @@ void Simulator::DrawRoom(GraphicsContext* gc) {
 	//draw ui stuff
 	char* timeDateString = "00/00/00 - 00:00:00";
 	TimeAndDate(timeDateString);
-	gc->PutText(timeDateString, 6, 191, 0x40);
-	gc->PutText(timeDateString, 5, 190, 0x3f);
+	gc->PutText(timeDateString, 6, GRAPHICS_LOGICAL_HEIGHT-9, 0x40);
+	gc->PutText(timeDateString, 5, GRAPHICS_LOGICAL_HEIGHT-10, 0x3f);
 }

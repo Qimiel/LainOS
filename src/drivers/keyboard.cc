@@ -7,6 +7,35 @@ using namespace os::drivers;
 using namespace os::hardwarecommunication;
 
 
+static bool WaitPS2InputClear(Port8Bit& commandport) {
+
+	for (uint32_t timeout = 0; timeout < 100000; timeout++) {
+
+		if ((commandport.Read() & 0x02) == 0) { return true; }
+	}
+	return false;
+}
+
+
+static bool WaitPS2OutputFull(Port8Bit& commandport) {
+
+	for (uint32_t timeout = 0; timeout < 100000; timeout++) {
+
+		if ((commandport.Read() & 0x01) != 0) { return true; }
+	}
+	return false;
+}
+
+
+static void DrainPS2Output(Port8Bit& commandport, Port8Bit& dataport) {
+
+	for (uint32_t timeout = 0; timeout < 256 && (commandport.Read() & 0x01) != 0; timeout++) {
+
+		dataport.Read();
+	}
+}
+
+
 
 
 KeyboardEventHandler::KeyboardEventHandler() {
@@ -45,21 +74,28 @@ KeyboardDriver::~KeyboardDriver() {
 
 
 void KeyboardDriver::Activate() {
-	
-	while (commandport.Read() & 0x1) {
-	
-		dataport.Read();
 
-		commandport.Write(0xAE); // activate interrupts
-		commandport.Write(0x20); // get current state
-		
-		uint8_t status = (dataport.Read() | 1) & ~0x10;
-		
-		commandport.Write(0x60); // set state
-		dataport.Write(status);
+	DrainPS2Output(commandport, dataport);
 
-		dataport.Write(0xF4);
-	}
+	if (!WaitPS2InputClear(commandport)) { return; }
+	commandport.Write(0xAE); // activate keyboard port
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	commandport.Write(0x20); // get current state
+
+	if (!WaitPS2OutputFull(commandport)) { return; }
+	uint8_t status = (dataport.Read() | 1) & ~0x10;
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	commandport.Write(0x60); // set state
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	dataport.Write(status);
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	dataport.Write(0xF4); // enable scanning
+
+	if (WaitPS2OutputFull(commandport)) { dataport.Read(); }
 }
 
 

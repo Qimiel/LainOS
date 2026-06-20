@@ -7,16 +7,36 @@ using namespace os::common;
 GlobalDescriptorTable::GlobalDescriptorTable()
 : nullSegmentSelector(0, 0, 0),
 unusedSegmentSelector(0, 0, 0),
-codeSegmentSelector(0, 64*1024*1024, 0x9A),
-dataSegmentSelector(0, 64*1024*1024, 0x92) {
+codeSegmentSelector(0, 0xFFFFFFFF, 0x9A),
+dataSegmentSelector(0, 0xFFFFFFFF, 0x92) {
 
 
+	struct GlobalDescriptorTablePointer {
+		uint16_t size;
+		uint32_t base;
+	} __attribute__((packed));
 
-	uint32_t i[2];
-	i[0] = (uint32_t)this;
-	i[1] = sizeof(GlobalDescriptorTable) << 16;
+	GlobalDescriptorTablePointer gdtPointer;
+	gdtPointer.size = sizeof(GlobalDescriptorTable) - 1;
+	gdtPointer.base = (uint32_t)this;
 
-	asm volatile("lgdt (%0)": :"p" (((uint8_t *) i) + 2));
+	asm volatile("lgdt %0" : : "m" (gdtPointer) : "memory");
+
+	uint16_t codeSegment = CodeSegmentSelector();
+	uint16_t dataSegment = DataSegmentSelector();
+	asm volatile(
+		"movw %%dx, %%ds\n"
+		"movw %%dx, %%es\n"
+		"movw %%dx, %%fs\n"
+		"movw %%dx, %%gs\n"
+		"movw %%dx, %%ss\n"
+		"pushw %%cx\n"
+		"pushl $1f\n"
+		"lretl\n"
+		"1:\n"
+		:
+		: "c" (codeSegment), "d" (dataSegment)
+		: "memory");
 
 }
 
@@ -105,5 +125,4 @@ uint32_t GlobalDescriptorTable::SegmentDescriptor::Limit() {
 
 	return result;
 }
-
 

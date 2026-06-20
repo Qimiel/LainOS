@@ -27,7 +27,7 @@ InterruptHandler::InterruptHandler(uint8_t interruptNumber, InterruptManager* in
 
 InterruptHandler::~InterruptHandler() {
 
-	if (interruptManager->handlers[interruptNumber] = this) {
+	if (interruptManager->handlers[interruptNumber] == this) {
 	
 		interruptManager->handlers[interruptNumber] = 0;
 	}
@@ -192,7 +192,7 @@ void InterruptManager::Activate() {
 
 void InterruptManager::Deactivate() {
 	
-	if (ActiveInterruptManager != this) {
+	if (ActiveInterruptManager == this) {
 	
 		ActiveInterruptManager = 0;
 		asm ("cli");
@@ -249,4 +249,3 @@ uint32_t InterruptManager::DoHandleInterrupt(uint8_t interruptNumber, uint32_t e
 	
 	return esp;
 }
-

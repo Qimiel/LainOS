@@ -36,7 +36,7 @@ FileSystem* filesystem)
 	this->winColor = 0x0d;
 
 	//fill buffer with some color
-	for (int i = 0; i < 64000; i++) { this->buf[i] = color; }
+	for (uint32_t i = 0; i < GRAPHICS_LOGICAL_SIZE; i++) { this->buf[i] = color; }
 }
 
 
@@ -186,8 +186,8 @@ void Window::FullScreen() {
 	
 		x = 0;
 		y = 0;
-		w = 320;
-		h = 200;
+		w = GRAPHICS_LOGICAL_WIDTH;
+		h = GRAPHICS_LOGICAL_HEIGHT;
 		this->Dragging = false;
 	} else {
 		w = wo;

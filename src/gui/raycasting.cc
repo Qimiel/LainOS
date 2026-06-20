@@ -73,10 +73,10 @@ void RaycastSpace::ComputeSpace(GraphicsContext* gc, char keylog[16], uint8_t lo
 	double time = 0;
 	double oldTime = 0;
 
-	const uint16_t w = 320;
-	const uint8_t h = 200;
+	const uint16_t w = GRAPHICS_LOGICAL_WIDTH;
+	const uint8_t h = GRAPHICS_LOGICAL_HEIGHT;
 
-	gc->FillRectangle(0, 0, 320, 200, 0x40);
+	gc->FillRectangle(0, 0, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x40);
 
 
 	//floor casting

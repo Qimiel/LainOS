@@ -25,6 +25,7 @@ namespace os {
 	
 				common::uint32_t readCount();
 				void setCount(common::uint32_t count);
+				void SetFrequency(common::uint32_t frequency);
 		};
 	}
 }

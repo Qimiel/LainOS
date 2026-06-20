@@ -8,7 +8,7 @@ namespace os {
 	namespace drivers {
 
 		class Driver {
-	
+
 			public:
 				Driver();
 				~Driver();
@@ -19,10 +19,10 @@ namespace os {
 		};
 
 		class DriverManager {
-	
+
 			public:
 				Driver* drivers[256];
-				int numDrivers = 0;
+				int numDrivers;
 			public:
 				DriverManager();
 				void AddDriver(Driver*);

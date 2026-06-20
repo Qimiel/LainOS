@@ -5,6 +5,35 @@ using namespace os::drivers;
 using namespace os::hardwarecommunication;
 
 
+static bool WaitPS2InputClear(Port8Bit& commandport) {
+
+	for (uint32_t timeout = 0; timeout < 100000; timeout++) {
+
+		if ((commandport.Read() & 0x02) == 0) { return true; }
+	}
+	return false;
+}
+
+
+static bool WaitPS2OutputFull(Port8Bit& commandport) {
+
+	for (uint32_t timeout = 0; timeout < 100000; timeout++) {
+
+		if ((commandport.Read() & 0x01) != 0) { return true; }
+	}
+	return false;
+}
+
+
+static void DrainPS2Output(Port8Bit& commandport, Port8Bit& dataport) {
+
+	for (uint32_t timeout = 0; timeout < 256 && (commandport.Read() & 0x01) != 0; timeout++) {
+
+		dataport.Read();
+	}
+}
+
+
 
 MouseEventHandler::MouseEventHandler() {
 }
@@ -42,17 +71,31 @@ void MouseDriver::Activate() {
 	offset = 0;
 	buttons = 0;
 
-	commandport.Write(0xA8); // activate interrupts
-        commandport.Write(0x20); // get current state
+	DrainPS2Output(commandport, dataport);
 
-        uint8_t status = dataport.Read() | 2;
+	if (!WaitPS2InputClear(commandport)) { return; }
+	commandport.Write(0xA8); // activate auxiliary device
 
-        commandport.Write(0x60); // set state
-        dataport.Write(status);
+	if (!WaitPS2InputClear(commandport)) { return; }
+	commandport.Write(0x20); // get current state
 
+	if (!WaitPS2OutputFull(commandport)) { return; }
+	uint8_t status = dataport.Read() | 2;
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	commandport.Write(0x60); // set state
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	dataport.Write(status);
+
+	if (!WaitPS2InputClear(commandport)) { return; }
 	commandport.Write(0xD4);
-        dataport.Write(0xF4);
-	dataport.Read();
+
+	if (!WaitPS2InputClear(commandport)) { return; }
+	dataport.Write(0xF4);
+
+	if (WaitPS2OutputFull(commandport)) { dataport.Read(); }
+	if (handler != 0) { handler->OnActivate(); }
 }
 
 

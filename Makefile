@@ -2,9 +2,9 @@
 #sudo apt-get install qemu-system-x86_64 grub-legacy grub-mkrescue grub2 xorriso
 
 
-GPPPARAMS = -m32 -Iinclude -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-leading-underscore -Wno-write-strings
+GPPPARAMS = -m32 -Iinclude -ffreestanding -nostdlib -fno-builtin -fno-use-cxa-atexit -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-leading-underscore -Wno-write-strings -fno-stack-protector -fno-pic -fno-pie -fno-plt -fcf-protection=none -fno-asynchronous-unwind-tables -fno-unwind-tables -march=i486 -mno-sse -mno-sse2 -mno-mmx
 ASPARAMS = --32
-LDPARAMS = -melf_i386
+LDPARAMS = -melf_i386 -no-pie --build-id=none -z max-page-size=0x1000
 
 objects = obj/loader.o \
 	  obj/gdt.o \
@@ -73,6 +73,8 @@ Lain.iso: Lain.bin
 	cp Lain.bin iso/boot/Lain.bin
 	echo 'set timeout=0' >> iso/boot/grub/grub.cfg
 	echo 'set default=0' >> iso/boot/grub/grub.cfg
+	echo 'set gfxmode=1600x900x32' >> iso/boot/grub/grub.cfg
+	echo 'set gfxpayload=keep' >> iso/boot/grub/grub.cfg
 	echo '' >> iso/boot/grub/grub.cfg
 	echo 'menuentry "Lain" {' >> iso/boot/grub/grub.cfg
 	echo '	multiboot /boot/Lain.bin' >> iso/boot/grub/grub.cfg
@@ -101,4 +103,3 @@ run: Lain.iso
 .PHONY: clean
 clean:
 	rm -rf obj Lain.bin Lain.iso
-

@@ -21,12 +21,12 @@ Desktop::Desktop(common::int32_t w, common::int32_t h,
 		 CMOS* cmos, DriverManager* drvManager,
 		 Button* buttons,
 		 Simulator* Lain)
-: CompositeWidget(0, 0, 0, w, h, "desktop", color, false), 
+: CompositeWidget(0, 0, 0, w, h, "desktop", color, false),
   MouseEventHandler() {
 
 	MouseX = w / 2;
 	MouseY = h / 2;
-	
+
 	this->color = color;
 
 	this->gc = gc;
@@ -41,18 +41,18 @@ Desktop::Desktop(common::int32_t w, common::int32_t h,
 
 
 	//setup background
-	uint8_t tmp[64000];
-	for (int i = 0; i < 64000; i++) { tmp[i] = 0x05; }
-	
-	uint16_t bgw = 320;
-	uint8_t bgh = 200;
+	uint8_t tmp[GRAPHICS_LOGICAL_SIZE];
+	for (uint32_t i = 0; i < GRAPHICS_LOGICAL_SIZE; i++) { tmp[i] = 0x05; }
+
+	uint16_t bgw = GRAPHICS_LOGICAL_WIDTH;
+	uint8_t bgh = GRAPHICS_LOGICAL_HEIGHT;
 	this->filesystem->Read13H("home", tmp, &bgw, &bgh);
 
 
-	for (uint32_t y = 0; y < 200; y++) {	
-		for (uint32_t x = 0; x < 320; x++) {
-		
-			this->WritePixel(x, y, tmp[320*y+x]);
+	for (uint32_t y = 0; y < GRAPHICS_LOGICAL_HEIGHT; y++) {
+		for (uint32_t x = 0; x < GRAPHICS_LOGICAL_WIDTH; x++) {
+
+			this->WritePixel(x, y, tmp[LogicalIndex(x, y)]);
 		}
 	}
 }
@@ -82,7 +82,7 @@ CompositeWidget* Desktop::CreateChild(uint8_t appType, char* name, App* oldApp) 
 			}
 			break;
 		//paint
-		case 2:	
+		case 2:
 			{
 			Paint* paint = (Paint*)memoryManager->malloc(sizeof(Paint));
 			new (paint) Paint();
@@ -104,11 +104,11 @@ CompositeWidget* Desktop::CreateChild(uint8_t appType, char* name, App* oldApp) 
 		default:
 			{
 			if (oldApp != nullptr) {
-			
+
 				app = (CommandLine*)oldApp;
 			} else {
 				CommandLine* newCli = (CommandLine*)memoryManager->malloc(sizeof(CommandLine));
-				new (newCli) CommandLine(this->gdt, this->taskManager, this->memoryManager, 
+				new (newCli) CommandLine(this->gdt, this->taskManager, this->memoryManager,
 							 this->filesystem, this->cmos, this->drvManager);
 				app = newCli;
 			}
@@ -120,7 +120,7 @@ CompositeWidget* Desktop::CreateChild(uint8_t appType, char* name, App* oldApp) 
 	//create window
 	Window* window = (Window*)memoryManager->malloc(sizeof(Window));
 	new (window) Window(this, 70, 50, 180, 80, name, color, app, this->filesystem);
-	this->AddChild(window);	
+	this->AddChild(window);
 	this->GetFocus(window);
 	return window;
 }
@@ -140,20 +140,20 @@ void Desktop::FreeChild(Window* window) {
 
 
 void Desktop::Draw(common::GraphicsContext* gc) {
-	
+
 	if (this->keyValue == 0x5b) {
 
 		this->Lain->sim ^= 1;
 		this->OnMouseUp(0);
 		this->keyValue = 0;
 	}
-	
-	
+
+
 	if (this->Lain->sim == false) {
 
 		//draw background
-		gc->FillBuffer(0, 0, 320, 200, this->buf, false);
-	
+		gc->FillBuffer(0, 0, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, this->buf, false);
+
 		//draw buttons
 		if (drawButtons) { this->buttons->Draw(gc); }
 
@@ -169,50 +169,50 @@ void Desktop::Draw(common::GraphicsContext* gc) {
 	gc->MakeDark(this->Lain->darkLevel);
 	gc->MakeWave(this->Lain->waveLength);
 
-	
+
 
 	//cursor
 	this->MouseDraw(gc);
-	
+
 	//screenshot screen
 	if (takeSS) {
 		this->Screenshot();
 		this->takeSS = false;
 	}
-		
+
 	//write to video memory
 	gc->DrawToScreen();
 }
 
 
 void Desktop::DrawTaskBar(common::GraphicsContext* gc) {
-	
+
 	//avoid divide by 0
 	if (this->minWindows == 0) { return; }
 
-	gc->FillRectangle(0, 187, 320, 20, 0x07);
-	gc->DrawLine(0, 187, 320, 187, 0x3f);
+	gc->FillRectangle(0, GRAPHICS_LOGICAL_HEIGHT-13, GRAPHICS_LOGICAL_WIDTH, 20, 0x07);
+	gc->DrawLine(0, GRAPHICS_LOGICAL_HEIGHT-13, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT-13, 0x3f);
 
 
-	uint16_t ButtonWidth = (320 / this->minWindows);
+	uint16_t ButtonWidth = (GRAPHICS_LOGICAL_WIDTH / this->minWindows);
 	uint8_t ButtonNum = 0;
 
 	for (int i = 0; i < numChildren; i++) {
 
 		if (this->children[i]->Min) {
-			
-			//draw button
-			uint8_t x0 = (ButtonWidth * ButtonNum);
 
-			gc->FillRectangle(x0, 189, x0+ButtonWidth, 198, ButtonNum+1);
-			gc->DrawRectangle(x0, 189, x0+ButtonWidth, 198, 0x38);
+			//draw button
+			uint16_t x0 = (ButtonWidth * ButtonNum);
+
+			gc->FillRectangle(x0, GRAPHICS_LOGICAL_HEIGHT-11, x0+ButtonWidth, GRAPHICS_LOGICAL_HEIGHT-2, ButtonNum+1);
+			gc->DrawRectangle(x0, GRAPHICS_LOGICAL_HEIGHT-11, x0+ButtonWidth, GRAPHICS_LOGICAL_HEIGHT-2, 0x38);
 			ButtonNum++;
-			
+
 			//draw name of window
 			char* name = children[i]->name;
 			//name[ButtonWidth/5] = '\0';
-			gc->PutText(name, x0+2, 192, 0x40);
-			gc->PutText(name, x0+1, 191, 0x3f);
+			gc->PutText(name, x0+2, GRAPHICS_LOGICAL_HEIGHT-8, 0x40);
+			gc->PutText(name, x0+1, GRAPHICS_LOGICAL_HEIGHT-9, 0x3f);
 		}
 	}
 }
@@ -220,20 +220,20 @@ void Desktop::DrawTaskBar(common::GraphicsContext* gc) {
 void Desktop::TaskBarClick(uint8_t button) {
 
 	if (this->minWindows == 0) { return; }
-	
-	uint16_t ButtonWidth = (320 / this->minWindows);
+
+	uint16_t ButtonWidth = (GRAPHICS_LOGICAL_WIDTH / this->minWindows);
 	uint16_t ButtonNum = (MouseX / ButtonWidth) + 1;
 
 	//MouseX;
 	int i = 0;
 	uint8_t windowIndex = this->minWindows;
 	for (int i = numChildren-1; i >= 0; i--) {
-	
+
 		if (this->children[i]->Min) {
-		
-			if (windowIndex == ButtonNum) { 
-		
-				//unminimize	
+
+			if (windowIndex == ButtonNum) {
+
+				//unminimize
 				children[i]->x = 80;
 				children[i]->y = 55;
 				children[i]->w = children[i]->wo;
@@ -242,8 +242,8 @@ void Desktop::TaskBarClick(uint8_t button) {
 				this->GetFocus(children[i]);
 				this->minWindows--;
 				return;
-			} else { 
-				windowIndex--; 
+			} else {
+				windowIndex--;
 			}
 		}
 	}
@@ -253,7 +253,7 @@ void Desktop::DrawNoMouse(common::GraphicsContext* gc) { CompositeWidget::Draw(g
 
 
 void Desktop::MouseDraw(common::GraphicsContext* gc) {
-	
+
 	//mouse icon
 	uint16_t cursorIndex = 0;
 	uint8_t* cursorArt = nullptr;
@@ -268,12 +268,12 @@ void Desktop::MouseDraw(common::GraphicsContext* gc) {
 
 		if (this->focussedChild == 0) {
 
-			if (click) { cursorArt = cursorClickLeft; } 
+			if (click) { cursorArt = cursorClickLeft; }
 			else { cursorArt = cursorNormal; }
 		} else {
 			//unique cursors for each program
 			switch (this->focussedChild->ReturnAppType()) {
-			
+
 				case 2:
 					cursorArt = cursorChiChi;
 					mouseW = 17;
@@ -317,13 +317,13 @@ void Desktop::Screenshot() {
 	fileName[4] = hex[(count >> 8) & 0xf];
 	fileName[3] = hex[(count >> 12)];
 
-	uint8_t buf[64000];
+	uint8_t buf[GRAPHICS_LOGICAL_SIZE];
 
-	for (int i = 0; i < 64000; i++) {
-	
+	for (uint32_t i = 0; i < GRAPHICS_LOGICAL_SIZE; i++) {
+
 		buf[i] = this->gc->pixels[i];
 	}
-	this->filesystem->Write13H(fileName, buf, 320, 200);
+	this->filesystem->Write13H(fileName, buf, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT);
 }
 
 
@@ -335,8 +335,8 @@ void Desktop::OnMouseDown(common::uint8_t button) {
 	} else {
 		//left click after switching to sim and back
 		//and when there are 0 children (windows) causes crash
-		if (MouseY >= 190 && this->taskbar) {
-		
+		if (MouseY >= GRAPHICS_LOGICAL_HEIGHT-10 && this->taskbar) {
+
 			this->TaskBarClick(button);
 		}
 		this->click = true;
@@ -346,7 +346,7 @@ void Desktop::OnMouseDown(common::uint8_t button) {
 }
 
 void Desktop::OnMouseUp(common::uint8_t button) {
-	
+
 	if (this->Lain->sim) {
 		//this->Lain->OnMouseUp(MouseX, MouseY, button);
 	} else {
@@ -356,28 +356,28 @@ void Desktop::OnMouseUp(common::uint8_t button) {
 }
 
 void Desktop::OnMouseMove(int x, int y) {
-	
-		
+
+
 	int32_t newMouseX = MouseX + x;
 	this->oldMouseX = MouseX;
 
 	int32_t newMouseY = MouseY + y;
 	this->oldMouseY = MouseY;
-	
-	
+
+
 	if (this->Lain->sim) { this->Lain->OnMouseMove(MouseX, MouseY, newMouseX, newMouseY); }
 
 
 	if (newMouseX < 0) { newMouseX = 0; }
 	if (newMouseX >= w) { newMouseX = w - 1; }
-	
+
 	if (newMouseY < 0) { newMouseY = 0; }
 	if (newMouseY >= h) { newMouseY = h - 1; }
-	
+
 	CompositeWidget::OnMouseMove(MouseX, MouseY, newMouseX, newMouseY);
 	MouseX = newMouseX;
 	MouseY = newMouseY;
-	
+
 }
 
 
@@ -386,14 +386,14 @@ void Desktop::OnKeyDown(char str) {
 	if (this->Lain->sim) { this->Lain->OnKeyDown(str);
 	} else {
 		switch (str) {
-	
-			//f# keys	
+
+			//f# keys
 			case 1: this->taskbar ^= 1; break;
 			case 7:
 				{
 					/*
 					for (int i = 0; i < this->numChildren; i++) {
-					
+
 						this->children[i]->
 					}
 					*/
@@ -411,7 +411,7 @@ void Desktop::OnKeyDown(char str) {
 
 
 void Desktop::OnKeyUp(char str) {
-	
+
 	if (this->Lain->sim) { this->Lain->OnKeyUp(str); }
 	else { CompositeWidget::OnKeyUp(str); }
 }

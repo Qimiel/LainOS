@@ -33,8 +33,8 @@ void Button::Draw(GraphicsContext* gc) {
 
 	//init buffer 
 	//with pretty buttons
-	uint8_t buttonx = 0;
-	uint8_t buttony = 0;
+	uint16_t buttonx = 0;
+	uint16_t buttony = 0;
 
 	//96 different possible desktop shortcuts
 	for (int i = 0; i < this->numOfButtons; i++) {
@@ -72,7 +72,7 @@ void Button::Draw(GraphicsContext* gc) {
 		}
 		buttonx += 20;
 
-		if (buttonx >= 320) {
+		if (buttonx >= GRAPHICS_LOGICAL_WIDTH) {
 		
 			buttonx = 0;
 			buttony += 30;

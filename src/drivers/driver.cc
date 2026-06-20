@@ -16,6 +16,8 @@ void Driver::Activate() {
 }
 
 int Driver::Reset() {
+
+	return 0;
 }
 
 void Driver::Deactive() {
@@ -24,11 +26,19 @@ void Driver::Deactive() {
 
 
 DriverManager::DriverManager() {
+
 	numDrivers = 0;
+
+	for (int i = 0; i < 256; i++) {
+
+		drivers[i] = 0;
+	}
 }
 
 
 void DriverManager::AddDriver(Driver* drv) {
+
+	if (drv == 0 || numDrivers >= 256) { return; }
 
 	drivers[numDrivers] = drv;
 	numDrivers++;
@@ -38,15 +48,16 @@ void DriverManager::AddDriver(Driver* drv) {
 void DriverManager::ActivateAll() {
 
 	for (int i = 0; i < numDrivers; i++) {
-		
-		drivers[i]->Activate();
+
+		if (drivers[i] != 0) { drivers[i]->Activate(); }
 	}
 }
 
 
 void DriverManager::Replace(Driver* drv, int drvNum) {
 
-	drivers[drvNum] = drv;
-        drivers[drvNum]->Activate();	
-}
+	if (drv == 0 || drvNum < 0 || drvNum >= 256) { return; }
 
+	drivers[drvNum] = drv;
+	drivers[drvNum]->Activate();
+}

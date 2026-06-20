@@ -559,6 +559,8 @@ void ip(char* args, CommandLine* cli) {
 
 void ping(char* args, CommandLine* cli) {
 
+	if (cli->network == 0) { return; }
+
 	uint32_t ip = str2int(args);
 	cli->network->icmp->RequestEchoReply(ip);
 	cli->PrintCommand("\n");
@@ -674,7 +676,7 @@ void drawpic(char* args, CommandLine* cli) {
 	uint32_t y = numOrVar(args, cli, 2);
 	uint16_t w = 0;
 	uint8_t h = 0;
-	uint8_t buf[64000]; //ew
+	uint8_t buf[GRAPHICS_LOGICAL_SIZE]; //ew
 
 	//if we dont do this, filename cant be recognized
 
@@ -1314,7 +1316,7 @@ void neofetch(char* args, CommandLine* cli) {
 	cli->PrintCommand("        /----\\  ", p); cli->PrintCommand("CPU: ", r); cli->PrintCommand("Intel\n", w);
 	cli->PrintCommand("       //-v-/-\\ ", p); cli->PrintCommand("MEM: ", b); cli->PrintCommand(int2str(memory), w); cli->PrintCommand("MB of memory\n", w);
 	cli->PrintCommand("      /________\\ ", p); cli->PrintCommand("VGA: ", r); 
-    if (cli->gui == false) { cli->PrintCommand("80x25 Textmode\n", w);} else { cli->PrintCommand("320x200 Mode 13h\n", w); }
+    if (cli->gui == false) { cli->PrintCommand("80x25 Textmode\n", w);} else { cli->PrintCommand("1600x900 framebuffer\n", w); }
 	cli->PrintCommand("    /\\  @@@  //-\\          \n", p);
 	cli->PrintCommand("   /--\\  @  //---\\           \n", p);
 	cli->PrintCommand("  /----\\   //-----\\\n", p);

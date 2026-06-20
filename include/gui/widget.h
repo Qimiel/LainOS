@@ -5,6 +5,7 @@
 #include <common/graphicscontext.h>
 #include <drivers/keyboard.h>
 #include <gui/pixelart.h>
+#include <gui/screen.h>
 
 
 #define TEXT_MAX_WIDTH 53
@@ -29,7 +30,7 @@ namespace os {
 				
 
 				//graphical buffer for windows
-				common::uint8_t buf[64000];
+				common::uint8_t buf[GRAPHICS_LOGICAL_SIZE];
 				
 
 				//data for storing position

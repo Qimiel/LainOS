@@ -17,8 +17,8 @@ Platformer::~Platformer() {
 
 void Platformer::Draw(GraphicsContext* gc, uint16_t ticks) {
 
-	gc->FillRectangle(0, 0, 320, 200, 0x0b);
-	gc->FillRectangle(0, 160, 320, 200, 0x10);
+	gc->FillRectangle(0, 0, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x0b);
+	gc->FillRectangle(0, 160, GRAPHICS_LOGICAL_WIDTH, GRAPHICS_LOGICAL_HEIGHT, 0x10);
 
 	if (data.run) {
 	
@@ -48,7 +48,7 @@ void Platformer::ComputePlatformer(char keylog[16], uint8_t logIndex, bool keyPr
 					if (data.x + 20 < data.levelLength) {
 					
 						data.x += 2;
-						data.scroll = (data.levelLength - data.x < 320);
+						data.scroll = (data.levelLength - data.x < GRAPHICS_LOGICAL_WIDTH);
 						playerX += (2 * data.scroll);
 					}
 					data.facingLeft = false;
@@ -58,7 +58,7 @@ void Platformer::ComputePlatformer(char keylog[16], uint8_t logIndex, bool keyPr
 					if (data.x > 0) {
 					
 						data.x -= 2;
-						data.scroll = data.x < 320;
+						data.scroll = data.x < GRAPHICS_LOGICAL_WIDTH;
 						playerX -= (2 * data.scroll);
 					}
 					data.facingLeft = true;
@@ -103,7 +103,7 @@ bool Platformer::LoadData() {
 	data.y = 140;
 	data.yJump = 0;
 
-	data.levelLength = 320;
+	data.levelLength = GRAPHICS_LOGICAL_WIDTH;
 	data.scroll = false;
 	data.jump = false;
 	data.falling = false;

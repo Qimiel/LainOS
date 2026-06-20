@@ -10,7 +10,7 @@ namespace os {
 
 	class Paint : public App {
 
-		common::uint8_t backup[64000];
+		common::uint8_t backup[gui::GRAPHICS_LOGICAL_SIZE];
 
 		bool drawing = false;
 		common::uint8_t paintColor = 0x40;
@@ -18,8 +18,8 @@ namespace os {
 		common::uint8_t size = 0;
 		common::uint8_t zoomSize = 1;
 	
-		common::uint16_t width = 320;
-		common::uint8_t height = 200;
+		common::uint16_t width = gui::GRAPHICS_LOGICAL_WIDTH;
+		common::uint8_t height = gui::GRAPHICS_LOGICAL_HEIGHT;
 
 		common::uint16_t menuX = 0;
 		common::uint8_t menuY = 0;

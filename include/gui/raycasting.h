@@ -15,8 +15,8 @@ namespace os {
 		class RaycastSpace {
 	
 			public:
-				const double w = 320.0;
-				const double h = 200.0;
+				const double w = GRAPHICS_LOGICAL_WIDTH;
+				const double h = GRAPHICS_LOGICAL_HEIGHT;
 				int texW = 64.0;
 				int texH = 64.0;
 			
